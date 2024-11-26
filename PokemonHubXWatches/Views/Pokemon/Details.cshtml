@@ -1,0 +1,21 @@
+﻿@model PokemonHubXWatches.Models.Pokemon
+
+<h1>Pokémon Details</h1>
+
+<div>
+    <h4>@Model.PokemonName</h4>
+    <dl class="row">
+        <dt class="col-sm-2">Role</dt>
+        <dd class="col-sm-10">@Model.PokemonRole</dd>
+        <dt class="col-sm-2">Style</dt>
+        <dd class="col-sm-10">@Model.PokemonStyle</dd>
+        <dt class="col-sm-2">HP</dt>
+        <dd class="col-sm-10">@Model.PokemonHP</dd>
+        <dt class="col-sm-2">Attack</dt>
+        <dd class="col-sm-10">@Model.PokemonAttack</dd>
+        <dt class="col-sm-2">Defense</dt>
+        <dd class="col-sm-10">@Model.PokemonDefense</dd>
+    </dl>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

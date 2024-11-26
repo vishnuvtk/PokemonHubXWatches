@@ -1,0 +1,51 @@
+﻿@model PokemonHubXWatches.Models.Pokemon
+
+<h1>Edit Pokémon</h1>
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="PokemonId" />
+    <div class="form-group">
+        <label asp-for="PokemonName" class="form-label"></label>
+        <input asp-for="PokemonName" class="form-control" />
+        <span asp-validation-for="PokemonName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonRole" class="form-label"></label>
+        <input asp-for="PokemonRole" class="form-control" />
+        <span asp-validation-for="PokemonRole" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonStyle" class="form-label"></label>
+        <input asp-for="PokemonStyle" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonHP" class="form-label"></label>
+        <input asp-for="PokemonHP" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonAttack" class="form-label"></label>
+        <input asp-for="PokemonAttack" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonDefense" class="form-label"></label>
+        <input asp-for="PokemonDefense" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonSpAttack" class="form-label"></label>
+        <input asp-for="PokemonSpAttack" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonSpDefense" class="form-label"></label>
+        <input asp-for="PokemonSpDefense" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonCDR" class="form-label"></label>
+        <input asp-for="PokemonCDR" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonImage" class="form-label"></label>
+        <input asp-for="PokemonImage" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

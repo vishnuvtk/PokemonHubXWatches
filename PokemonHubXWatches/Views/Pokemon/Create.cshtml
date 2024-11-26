@@ -1,0 +1,45 @@
+﻿@model PokemonHubXWatches.Models.Pokemon
+
+<h1>Create Pokémon</h1>
+
+<form asp-action="Create">
+    <div class="form-group">
+        <label asp-for="PokemonName"></label>
+        <input asp-for="PokemonName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonRole"></label>
+        <input asp-for="PokemonRole" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonStyle"></label>
+        <input asp-for="PokemonStyle" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonHP"></label>
+        <input asp-for="PokemonHP" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonAttack"></label>
+        <input asp-for="PokemonAttack" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonDefense"></label>
+        <input asp-for="PokemonDefense" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonSpAttack"></label>
+        <input asp-for="PokemonSpAttack" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonSpDefense"></label>
+        <input asp-for="PokemonSpDefense" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PokemonCDR"></label>
+        <input asp-for="PokemonCDR" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>
