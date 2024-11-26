@@ -1,21 +1,37 @@
-﻿@model PokemonHubXWatches.Models.Pokemon
+﻿@model PokemonHubXWatches.ViewModels.PokemonDetailsViewModel
 
-<h1>Pokémon Details</h1>
+<h1>@Model.Pokemon.PokemonName</h1>
+<img src="@Model.Pokemon.PokemonImage" alt="@Model.Pokemon.PokemonName" />
+<p><strong>Role:</strong> @Model.Pokemon.PokemonRole</p>
+<p><strong>Style:</strong> @Model.Pokemon.PokemonStyle</p>
+<p><strong>Stats:</strong> HP: @Model.Pokemon.PokemonHP, Attack: @Model.Pokemon.PokemonAttack, Defense: @Model.Pokemon.PokemonDefense, Sp. Attack: @Model.Pokemon.PokemonSpAttack, Sp. Defense: @Model.Pokemon.PokemonSpDefense, CDR: @Model.Pokemon.PokemonCDR</p>
 
-<div>
-    <h4>@Model.PokemonName</h4>
-    <dl class="row">
-        <dt class="col-sm-2">Role</dt>
-        <dd class="col-sm-10">@Model.PokemonRole</dd>
-        <dt class="col-sm-2">Style</dt>
-        <dd class="col-sm-10">@Model.PokemonStyle</dd>
-        <dt class="col-sm-2">HP</dt>
-        <dd class="col-sm-10">@Model.PokemonHP</dd>
-        <dt class="col-sm-2">Attack</dt>
-        <dd class="col-sm-10">@Model.PokemonAttack</dd>
-        <dt class="col-sm-2">Defense</dt>
-        <dd class="col-sm-10">@Model.PokemonDefense</dd>
-    </dl>
-</div>
+<h2>Add Held Items</h2>
+<form asp-action="Create" asp-controller="Build">
+    <input type="hidden" asp-for="Pokemon.PokemonId" />
+    <div>
+        @for (int i = 0; i < Model.AvailableHeldItems.Count(); i++)
+        {
+            <div>
+                <input type="checkbox" name="SelectedHeldItemIds" value="@Model.AvailableHeldItems.ElementAt(i).HeldItemId" />
+                <label>@Model.AvailableHeldItems.ElementAt(i).HeldItemName</label>
+            </div>
+        }
+    </div>
+    <button type="submit" formaction="/Build/CalculateStats" class="btn btn-secondary">Check Stats</button>
+    <button type="submit" class="btn btn-primary">Save Build</button>
+</form>
 
-<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+@if (Model.UpdatedStats != null)
+{
+    <h3>Updated Stats</h3>
+    <table>
+        <tr><th>HP</th><td>@Model.UpdatedStats.PokemonUpdatedHP</td></tr>
+        <tr><th>Attack</th><td>@Model.UpdatedStats.PokemonUpdatedAttack</td></tr>
+        <tr><th>Defense</th><td>@Model.UpdatedStats.PokemonUpdatedDefense</td></tr>
+        <tr><th>Sp. Attack</th><td>@Model.UpdatedStats.PokemonUpdatedSpAttack</td></tr>
+        <tr><th>Sp. Defense</th><td>@Model.UpdatedStats.PokemonUpdatedSpDefense</td></tr>
+        <tr><th>CDR</th><td>@Model.UpdatedStats.PokemonUpdatedCDR</td></tr>
+    </table>
+}
+<a asp-action="Index" class="btn btn-secondary">Back to Gallery</a>

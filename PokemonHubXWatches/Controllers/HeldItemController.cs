@@ -13,85 +13,78 @@ namespace PokemonHubXWatches.Controllers
             _heldItemService = heldItemService;
         }
 
-        // GET: HeldItem
-        public async Task<IActionResult> Index()
+        // GET: /HeldItem
+        public IActionResult Index()
         {
-            var heldItems = await _heldItemService.ListHeldItems();
-            return View(heldItems);
+            var heldItems = _heldItemService.GetAllHeldItems();
+            return View(heldItems); // Renders the Index view with Held Item list
         }
 
-        // GET: HeldItem/Details/5
-        public async Task<IActionResult> Details(int id)
+        // GET: /HeldItem/Details/{id}
+        public IActionResult Details(int id)
         {
-            var heldItem = await _heldItemService.FindHeldItem(id);
+            var heldItem = _heldItemService.GetHeldItemById(id);
             if (heldItem == null) return NotFound();
-
-            return View(heldItem);
+            return View(heldItem); // Renders the Details view for a specific Held Item
         }
 
-        // GET: HeldItem/Create
+        // GET: /HeldItem/Create
         public IActionResult Create()
         {
-            return View();
+            return View(); // Renders the Create form
         }
 
-        // POST: HeldItem/Create
+        // POST: /HeldItem/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("HeldItemName,HeldItemHP,HeldItemAttack,HeldItemDefense,HeldItemSpAttack,HeldItemSpDefense,HeldItemCDR,HeldItemImage")] HeldItem heldItem)
+        public IActionResult Create(HeldItemDTO heldItem)
         {
             if (ModelState.IsValid)
             {
-                await _heldItemService.CreateHeldItem(heldItem);
-                return RedirectToAction(nameof(Index));
+                _heldItemService.AddHeldItem(heldItem);
+                return RedirectToAction(nameof(Index)); // Redirect to Held Item list
             }
-            return View(heldItem);
+            return View(heldItem); // Return to Create form with validation errors
         }
 
-        // GET: HeldItem/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        // GET: /HeldItem/Edit/{id}
+        public IActionResult Edit(int id)
         {
-            var heldItem = await _heldItemService.FindHeldItem(id);
+            var heldItem = _heldItemService.GetHeldItemById(id);
             if (heldItem == null) return NotFound();
-
-            return View(heldItem);
+            return View(heldItem); // Renders the Edit form
         }
 
-        // POST: HeldItem/Edit/5
+        // POST: /HeldItem/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("HeldItemId,HeldItemName,HeldItemHP,HeldItemAttack,HeldItemDefense,HeldItemSpAttack,HeldItemSpDefense,HeldItemCDR,HeldItemImage")] HeldItem heldItem)
+        public IActionResult Edit(HeldItemDTO heldItem)
         {
-            if (id != heldItem.HeldItemId) return NotFound();
-
             if (ModelState.IsValid)
             {
-                var success = await _heldItemService.UpdateHeldItem(id, heldItem);
+                var success = _heldItemService.UpdateHeldItem(heldItem);
                 if (!success) return NotFound();
-
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index)); // Redirect to Held Item list
             }
-            return View(heldItem);
+            return View(heldItem); // Return to Edit form with validation errors
         }
 
-        // GET: HeldItem/Delete/5
-        public async Task<IActionResult> Delete(int id)
+        // GET: /HeldItem/Delete/{id}
+        public IActionResult Delete(int id)
         {
-            var heldItem = await _heldItemService.FindHeldItem(id);
+            var heldItem = _heldItemService.GetHeldItemById(id);
             if (heldItem == null) return NotFound();
-
-            return View(heldItem);
+            return View(heldItem); // Renders the Delete confirmation view
         }
 
-        // POST: HeldItem/Delete/5
+        // POST: /HeldItem/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult ConfirmDelete(int id)
         {
-            var success = await _heldItemService.DeleteHeldItem(id);
+            var success = _heldItemService.DeleteHeldItem(id);
             if (!success) return NotFound();
-
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index)); // Redirect to Held Item list
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using PokemonHubXWatches.Interfaces;
 using PokemonHubXWatches.Models;
+using PokemonHubXWatches.ViewModels;
 
 namespace PokemonHubXWatches.Controllers
 {
@@ -18,135 +18,81 @@ namespace PokemonHubXWatches.Controllers
             _heldItemService = heldItemService;
         }
 
-        // GET: Build
-        public async Task<IActionResult> Index()
+        // GET: /Build
+        public IActionResult Index()
         {
-            var builds = await _buildService.ListBuilds();
-            return View(builds);
+            var builds = _buildService.GetAllBuilds();
+            return View(builds); // Renders the Index view with Build list
         }
 
-        // GET: Build/Details/5
-        public async Task<IActionResult> Details(int id)
+        // GET: /Build/Details/{id}
+        public IActionResult Details(int id)
         {
-            var build = await _buildService.FindBuild(id);
+            var build = _buildService.GetBuildById(id);
             if (build == null) return NotFound();
 
-            return View(build);
+            var pokemon = _pokemonService.GetPokemonById(build.PokemonId);
+            var heldItems = _heldItemService.GetAllHeldItems();
+
+            var viewModel = new BuildDetailsViewModel
+            {
+                Build = build,
+                Pokemon = pokemon,
+                HeldItems = heldItems
+            };
+
+            return View(viewModel); // Renders the Details view for a specific Build
         }
 
-        // GET: Build/Create
-        public async Task<IActionResult> Create()
+        // GET: /Build/Create
+        public IActionResult Create(int pokemonId)
         {
-            var pokemons = await _pokemonService.ListPokemons();
-            var heldItems = await _heldItemService.ListHeldItems();
+            var pokemon = _pokemonService.GetPokemonById(pokemonId);
+            if (pokemon == null) return NotFound();
 
-            ViewBag.Pokemons = new SelectList(pokemons, "PokemonId", "PokemonName");
-            ViewBag.HeldItems = new MultiSelectList(heldItems, "HeldItemId", "HeldItemName");
+            var heldItems = _heldItemService.GetAllHeldItems();
 
-            return View();
+            var viewModel = new BuildCreationViewModel
+            {
+                Pokemon = pokemon,
+                AvailableHeldItems = heldItems
+            };
+
+            return View(viewModel); // Renders the Create form
         }
 
-        // POST: Build/Create
+        // POST: /Build/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Build build, int[] heldItemIds)
+        public IActionResult Create(BuildCreationViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // Attach Held Items to the build
-                foreach (var heldItemId in heldItemIds)
-                {
-                    var heldItem = await _heldItemService.FindHeldItem(heldItemId);
-                    if (heldItem != null)
-                    {
-                        build.HeldItems.Add(heldItem);
-                    }
-                }
-
-                await _buildService.CreateBuild(build);
-                return RedirectToAction(nameof(Index));
+                var build = _buildService.CalculateUpdatedStats(model.Pokemon.PokemonId, model.SelectedHeldItemIds);
+                var savedBuild = _buildService.CreateBuild(build);
+                return RedirectToAction(nameof(Details), new { id = savedBuild.BuildId });
             }
 
-            // Reload dropdowns in case of error
-            var pokemons = await _pokemonService.ListPokemons();
-            var heldItems = await _heldItemService.ListHeldItems();
-
-            ViewBag.Pokemons = new SelectList(pokemons, "PokemonId", "PokemonName");
-            ViewBag.HeldItems = new MultiSelectList(heldItems, "HeldItemId", "HeldItemName");
-
-            return View(build);
+            model.AvailableHeldItems = _heldItemService.GetAllHeldItems();
+            return View(model); // Return to Create form with validation errors
         }
 
-        // GET: Build/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        // GET: /Build/Delete/{id}
+        public IActionResult Delete(int id)
         {
-            var build = await _buildService.FindBuild(id);
+            var build = _buildService.GetBuildById(id);
             if (build == null) return NotFound();
-
-            var pokemons = await _pokemonService.ListPokemons();
-            var heldItems = await _heldItemService.ListHeldItems();
-
-            ViewBag.Pokemons = new SelectList(pokemons, "PokemonId", "PokemonName", build.PokemonId);
-            ViewBag.HeldItems = new MultiSelectList(heldItems, "HeldItemId", "HeldItemName", build.HeldItems.Select(h => h.HeldItemId));
-
-            return View(build);
+            return View(build); // Renders the Delete confirmation view
         }
 
-        // POST: Build/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Build build, int[] heldItemIds)
-        {
-            if (id != build.BuildId) return NotFound();
-
-            if (ModelState.IsValid)
-            {
-                // Update Held Items
-                var updatedHeldItems = new List<HeldItem>();
-                foreach (var heldItemId in heldItemIds)
-                {
-                    var heldItem = await _heldItemService.FindHeldItem(heldItemId);
-                    if (heldItem != null)
-                    {
-                        updatedHeldItems.Add(heldItem);
-                    }
-                }
-                build.HeldItems = updatedHeldItems;
-
-                var success = await _buildService.UpdateBuild(id, build);
-                if (!success) return NotFound();
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            // Reload dropdowns in case of error
-            var pokemons = await _pokemonService.ListPokemons();
-            var heldItems = await _heldItemService.ListHeldItems();
-
-            ViewBag.Pokemons = new SelectList(pokemons, "PokemonId", "PokemonName", build.PokemonId);
-            ViewBag.HeldItems = new MultiSelectList(heldItems, "HeldItemId", "HeldItemName", build.HeldItems.Select(h => h.HeldItemId));
-
-            return View(build);
-        }
-
-        // GET: Build/Delete/5
-        public async Task<IActionResult> Delete(int id)
-        {
-            var build = await _buildService.FindBuild(id);
-            if (build == null) return NotFound();
-
-            return View(build);
-        }
-
-        // POST: Build/Delete/5
+        // POST: /Build/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult ConfirmDelete(int id)
         {
-            var success = await _buildService.DeleteBuild(id);
+            var success = _buildService.DeleteBuild(id);
             if (!success) return NotFound();
-
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index)); // Redirect to Build list
         }
     }
 }

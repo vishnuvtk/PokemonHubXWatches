@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using PokemonHubXWatches.Data;
-using PokemonHubXWatches.Interfaces;
 using PokemonHubXWatches.Models;
+using PokemonHubXWatches.Interfaces;
 
 namespace PokemonHubXWatches.Services
+
 {
     public class PokemonService : IPokemonService
     {
@@ -17,61 +16,98 @@ namespace PokemonHubXWatches.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Pokemon>> ListPokemons()
+        public IEnumerable<PokemonDTO> GetAllPokemon()
         {
-            return await _context.Pokemons.ToListAsync();
+            return _context.Pokemons.Select(p => new PokemonDTO
+            {
+                PokemonId = p.PokemonId,
+                PokemonName = p.PokemonName,
+                PokemonRole = p.PokemonRole,
+                PokemonStyle = p.PokemonStyle,
+                PokemonHP = p.PokemonHP,
+                PokemonAttack = p.PokemonAttack,
+                PokemonDefense = p.PokemonDefense,
+                PokemonSpAttack = p.PokemonSpAttack,
+                PokemonSpDefense = p.PokemonSpDefense,
+                PokemonCDR = p.PokemonCDR,
+                PokemonImage = p.PokemonImage
+            }).ToList();
         }
 
-        public async Task<Pokemon> FindPokemon(int id)
+        public PokemonDTO GetPokemonById(int id)
         {
-            return await _context.Pokemons.FindAsync(id);
+            var pokemon = _context.Pokemons.Find(id);
+            if (pokemon == null) return null;
+
+            return new PokemonDTO
+            {
+                PokemonId = pokemon.PokemonId,
+                PokemonName = pokemon.PokemonName,
+                PokemonRole = pokemon.PokemonRole,
+                PokemonStyle = pokemon.PokemonStyle,
+                PokemonHP = pokemon.PokemonHP,
+                PokemonAttack = pokemon.PokemonAttack,
+                PokemonDefense = pokemon.PokemonDefense,
+                PokemonSpAttack = pokemon.PokemonSpAttack,
+                PokemonSpDefense = pokemon.PokemonSpDefense,
+                PokemonCDR = pokemon.PokemonCDR,
+                PokemonImage = pokemon.PokemonImage
+            };
         }
 
-        public async Task<Pokemon> CreatePokemon(Pokemon pokemon)
+        public PokemonDTO AddPokemon(PokemonDTO pokemon)
         {
-            _context.Pokemons.Add(pokemon);
-            await _context.SaveChangesAsync();
+            var entity = new Pokemon
+            {
+                PokemonName = pokemon.PokemonName,
+                PokemonRole = pokemon.PokemonRole,
+                PokemonStyle = pokemon.PokemonStyle,
+                PokemonHP = pokemon.PokemonHP,
+                PokemonAttack = pokemon.PokemonAttack,
+                PokemonDefense = pokemon.PokemonDefense,
+                PokemonSpAttack = pokemon.PokemonSpAttack,
+                PokemonSpDefense = pokemon.PokemonSpDefense,
+                PokemonCDR = pokemon.PokemonCDR,
+                PokemonImage = pokemon.PokemonImage
+            };
+
+            _context.Pokemons.Add(entity);
+            _context.SaveChanges();
+
+            pokemon.PokemonId = entity.PokemonId;
             return pokemon;
         }
 
-        public async Task<bool> UpdatePokemon(int id, Pokemon pokemon)
+        public bool UpdatePokemon(PokemonDTO pokemon)
         {
-            if (id != pokemon.PokemonId) return false;
+            var entity = _context.Pokemons.Find(pokemon.PokemonId);
+            if (entity == null) return false;
 
-            var existingPokemon = await _context.Pokemons.FindAsync(id);
-            if (existingPokemon == null) return false;
+            entity.PokemonName = pokemon.PokemonName;
+            entity.PokemonRole = pokemon.PokemonRole;
+            entity.PokemonStyle = pokemon.PokemonStyle;
+            entity.PokemonHP = pokemon.PokemonHP;
+            entity.PokemonAttack = pokemon.PokemonAttack;
+            entity.PokemonDefense = pokemon.PokemonDefense;
+            entity.PokemonSpAttack = pokemon.PokemonSpAttack;
+            entity.PokemonSpDefense = pokemon.PokemonSpDefense;
+            entity.PokemonCDR = pokemon.PokemonCDR;
+            entity.PokemonImage = pokemon.PokemonImage;
 
-            // Update Pokémon properties
-            existingPokemon.PokemonName = pokemon.PokemonName;
-            existingPokemon.PokemonRole = pokemon.PokemonRole;
-            existingPokemon.PokemonStyle = pokemon.PokemonStyle;
-            existingPokemon.PokemonHP = pokemon.PokemonHP;
-            existingPokemon.PokemonAttack = pokemon.PokemonAttack;
-            existingPokemon.PokemonDefense = pokemon.PokemonDefense;
-            existingPokemon.PokemonSpAttack = pokemon.PokemonSpAttack;
-            existingPokemon.PokemonSpDefense = pokemon.PokemonSpDefense;
-            existingPokemon.PokemonCDR = pokemon.PokemonCDR;
-            existingPokemon.PokemonImage = pokemon.PokemonImage;
+            _context.Pokemons.Update(entity);
+            _context.SaveChanges();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return false;
-            }
+            return true;
         }
 
-
-        public async Task<bool> DeletePokemon(int id)
+        public bool DeletePokemon(int id)
         {
-            var pokemon = await _context.Pokemons.FindAsync(id);
+            var pokemon = _context.Pokemons.Find(id);
             if (pokemon == null) return false;
 
             _context.Pokemons.Remove(pokemon);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
+
             return true;
         }
     }

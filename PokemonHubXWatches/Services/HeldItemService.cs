@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using PokemonHubXWatches.Data;
-using PokemonHubXWatches.Interfaces;
 using PokemonHubXWatches.Models;
+using PokemonHubXWatches.Interfaces;
 
 namespace PokemonHubXWatches.Services
 {
@@ -17,49 +15,90 @@ namespace PokemonHubXWatches.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<HeldItem>> ListHeldItems()
+        public IEnumerable<HeldItemDTO> GetAllHeldItems()
         {
-            return await _context.HeldItems.ToListAsync();
+            return _context.HeldItems.Select(item => new HeldItemDTO
+            {
+                HeldItemId = item.HeldItemId,
+                HeldItemName = item.HeldItemName,
+                HeldItemHP = item.HeldItemHP,
+                HeldItemAttack = item.HeldItemAttack,
+                HeldItemDefense = item.HeldItemDefense,
+                HeldItemSpAttack = item.HeldItemSpAttack,
+                HeldItemSpDefense = item.HeldItemSpDefense,
+                HeldItemCDR = item.HeldItemCDR,
+                HeldItemImage = item.HeldItemImage
+            }).ToList();
         }
 
-        public async Task<HeldItem> FindHeldItem(int id)
+        public HeldItemDTO GetHeldItemById(int id)
         {
-            return await _context.HeldItems.FindAsync(id);
+            var item = _context.HeldItems.Find(id);
+            if (item == null) return null;
+
+            return new HeldItemDTO
+            {
+                HeldItemId = item.HeldItemId,
+                HeldItemName = item.HeldItemName,
+                HeldItemHP = item.HeldItemHP,
+                HeldItemAttack = item.HeldItemAttack,
+                HeldItemDefense = item.HeldItemDefense,
+                HeldItemSpAttack = item.HeldItemSpAttack,
+                HeldItemSpDefense = item.HeldItemSpDefense,
+                HeldItemCDR = item.HeldItemCDR,
+                HeldItemImage = item.HeldItemImage
+            };
         }
 
-        public async Task<HeldItem> CreateHeldItem(HeldItem heldItem)
+        public HeldItemDTO AddHeldItem(HeldItemDTO heldItem)
         {
-            _context.HeldItems.Add(heldItem);
-            await _context.SaveChangesAsync();
+            var entity = new HeldItem
+            {
+                HeldItemName = heldItem.HeldItemName,
+                HeldItemHP = heldItem.HeldItemHP,
+                HeldItemAttack = heldItem.HeldItemAttack,
+                HeldItemDefense = heldItem.HeldItemDefense,
+                HeldItemSpAttack = heldItem.HeldItemSpAttack,
+                HeldItemSpDefense = heldItem.HeldItemSpDefense,
+                HeldItemCDR = heldItem.HeldItemCDR,
+                HeldItemImage = heldItem.HeldItemImage
+            };
+
+            _context.HeldItems.Add(entity);
+            _context.SaveChanges();
+
+            heldItem.HeldItemId = entity.HeldItemId;
             return heldItem;
         }
 
-        public async Task<bool> UpdateHeldItem(int id, HeldItem heldItem)
+        public bool UpdateHeldItem(HeldItemDTO heldItem)
         {
-            var existingItem = await _context.HeldItems.FindAsync(id);
-            if (existingItem == null) return false;
+            var entity = _context.HeldItems.Find(heldItem.HeldItemId);
+            if (entity == null) return false;
 
-            // Update properties
-            existingItem.HeldItemName = heldItem.HeldItemName;
-            existingItem.HeldItemHP = heldItem.HeldItemHP;
-            existingItem.HeldItemAttack = heldItem.HeldItemAttack;
-            existingItem.HeldItemDefense = heldItem.HeldItemDefense;
-            existingItem.HeldItemSpAttack = heldItem.HeldItemSpAttack;
-            existingItem.HeldItemSpDefense = heldItem.HeldItemSpDefense;
-            existingItem.HeldItemCDR = heldItem.HeldItemCDR;
-            existingItem.HeldItemImage = heldItem.HeldItemImage;
+            entity.HeldItemName = heldItem.HeldItemName;
+            entity.HeldItemHP = heldItem.HeldItemHP;
+            entity.HeldItemAttack = heldItem.HeldItemAttack;
+            entity.HeldItemDefense = heldItem.HeldItemDefense;
+            entity.HeldItemSpAttack = heldItem.HeldItemSpAttack;
+            entity.HeldItemSpDefense = heldItem.HeldItemSpDefense;
+            entity.HeldItemCDR = heldItem.HeldItemCDR;
+            entity.HeldItemImage = heldItem.HeldItemImage;
 
-            await _context.SaveChangesAsync();
+            _context.HeldItems.Update(entity);
+            _context.SaveChanges();
+
             return true;
         }
 
-        public async Task<bool> DeleteHeldItem(int id)
+        public bool DeleteHeldItem(int id)
         {
-            var heldItem = await _context.HeldItems.FindAsync(id);
+            var heldItem = _context.HeldItems.Find(id);
             if (heldItem == null) return false;
 
             _context.HeldItems.Remove(heldItem);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
+
             return true;
         }
     }

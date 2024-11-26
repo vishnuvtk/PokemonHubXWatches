@@ -1,68 +1,71 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PokemonHubXWatches.Interfaces;
 using PokemonHubXWatches.Models;
+using PokemonHubXWatches.ViewModels;
+using System.Collections.Generic;
 
-namespace PokemonHubXWatches.Controllers
+namespace PokemonHubXWatches.API
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class BuildAPIController : ControllerBase
     {
         private readonly IBuildService _buildService;
+        private readonly IPokemonService _pokemonService;
+        private readonly IHeldItemService _heldItemService;
 
-        public BuildAPIController(IBuildService buildService)
+        public BuildAPIController(IBuildService buildService, IPokemonService pokemonService, IHeldItemService heldItemService)
         {
             _buildService = buildService;
+            _pokemonService = pokemonService;
+            _heldItemService = heldItemService;
         }
 
-        // GET: api/BuildAPI/List
-        [HttpGet("List")]
-        public async Task<ActionResult<IEnumerable<Build>>> ListBuilds()
+        // GET: api/BuildAPI
+        [HttpGet]
+        public IActionResult GetAll()
         {
-            var builds = await _buildService.ListBuilds();
+            var builds = _buildService.GetAllBuilds();
             return Ok(builds);
         }
 
-        // GET: api/BuildAPI/Find/1
-        [HttpGet("Find/{id}")]
-        public async Task<ActionResult<Build>> FindBuild(int id)
+        // GET: api/BuildAPI/{id}
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
         {
-            var build = await _buildService.FindBuild(id);
-            if (build == null)
-                return NotFound();
-
+            var build = _buildService.GetBuildById(id);
+            if (build == null) return NotFound();
             return Ok(build);
         }
 
-        // POST: api/BuildAPI/Create
-        [HttpPost("Create")]
-        public async Task<ActionResult<Build>> CreateBuild([FromBody] Build build)
+        // POST: api/BuildAPI
+        [HttpPost]
+        public IActionResult Create([FromBody] BuildCreationViewModel model)
         {
-            if (build == null) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var createdBuild = await _buildService.CreateBuild(build);
-            return CreatedAtAction(nameof(FindBuild), new { id = createdBuild.BuildId }, createdBuild);
+            var build = _buildService.CalculateUpdatedStats(model.Pokemon.PokemonId, model.SelectedHeldItemIds);
+            var savedBuild = _buildService.CreateBuild(build);
+            return CreatedAtAction(nameof(GetById), new { id = savedBuild.BuildId }, savedBuild);
         }
 
-        // PUT: api/BuildAPI/Update/1
-        [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateBuild(int id, [FromBody] Build build)
+        // POST: api/BuildAPI/CalculateStats
+        [HttpPost("CalculateStats")]
+        public IActionResult CalculateStats([FromBody] BuildCreationViewModel model)
         {
-            if (id != build.BuildId) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var success = await _buildService.UpdateBuild(id, build);
-            if (!success) return NotFound();
-
-            return NoContent();
+            var updatedStats = _buildService.CalculateUpdatedStats(model.Pokemon.PokemonId, model.SelectedHeldItemIds);
+            if (updatedStats == null) return BadRequest("Invalid Pokémon or Held Items.");
+            return Ok(updatedStats);
         }
 
-        // DELETE: api/BuildAPI/Delete/1
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> DeleteBuild(int id)
+        // DELETE: api/BuildAPI/{id}
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
-            var success = await _buildService.DeleteBuild(id);
+            var success = _buildService.DeleteBuild(id);
             if (!success) return NotFound();
-
             return NoContent();
         }
     }

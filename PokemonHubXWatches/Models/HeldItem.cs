@@ -8,20 +8,32 @@ namespace PokemonHubXWatches.Models
         [Key]
         public int HeldItemId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Item name is required.")]
+        [StringLength(100, ErrorMessage = "Item name cannot exceed 100 characters.")]
         public string HeldItemName { get; set; }
 
+        [Range(0, 9999, ErrorMessage = "HP boost must be between 0 and 9999.")]
         public int HeldItemHP { get; set; }
+
+        [Range(0, 999, ErrorMessage = "Attack boost must be between 0 and 999.")]
         public int HeldItemAttack { get; set; }
+
+        [Range(0, 999, ErrorMessage = "Defense boost must be between 0 and 999.")]
         public int HeldItemDefense { get; set; }
+
+        [Range(0, 999, ErrorMessage = "Special Attack boost must be between 0 and 999.")]
         public int HeldItemSpAttack { get; set; }
+
+        [Range(0, 999, ErrorMessage = "Special Defense boost must be between 0 and 999.")]
         public int HeldItemSpDefense { get; set; }
+
+        [Range(0, 100, ErrorMessage = "Cooldown Reduction boost must be between 0 and 100.")]
         public int HeldItemCDR { get; set; }
 
+        [Required(ErrorMessage = "Image URL is required.")]
         public string HeldItemImage { get; set; } // URL or Path to the image file
 
         // Relationships
-        public ICollection<Pokemon> Pokemons { get; set; }
         public ICollection<Build> Builds { get; set; }
     }
 

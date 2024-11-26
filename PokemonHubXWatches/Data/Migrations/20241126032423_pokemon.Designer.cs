@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PokemonHubXWatches.Data;
 
@@ -11,9 +12,11 @@ using PokemonHubXWatches.Data;
 namespace PokemonHubXWatches.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241126032423_pokemon")]
+    partial class pokemon
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -301,8 +304,7 @@ namespace PokemonHubXWatches.Data.Migrations
 
                     b.Property<string>("HeldItemName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("HeldItemSpAttack")
                         .HasColumnType("int");
@@ -322,6 +324,9 @@ namespace PokemonHubXWatches.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PokemonId"));
+
+                    b.Property<int?>("HeldItemId")
+                        .HasColumnType("int");
 
                     b.Property<int>("PokemonAttack")
                         .HasColumnType("int");
@@ -359,6 +364,8 @@ namespace PokemonHubXWatches.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("PokemonId");
+
+                    b.HasIndex("HeldItemId");
 
                     b.ToTable("Pokemons");
                 });
@@ -438,6 +445,18 @@ namespace PokemonHubXWatches.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Pokemon");
+                });
+
+            modelBuilder.Entity("PokemonHubXWatches.Models.Pokemon", b =>
+                {
+                    b.HasOne("PokemonHubXWatches.Models.HeldItem", null)
+                        .WithMany("Pokemons")
+                        .HasForeignKey("HeldItemId");
+                });
+
+            modelBuilder.Entity("PokemonHubXWatches.Models.HeldItem", b =>
+                {
+                    b.Navigation("Pokemons");
                 });
 
             modelBuilder.Entity("PokemonHubXWatches.Models.Pokemon", b =>

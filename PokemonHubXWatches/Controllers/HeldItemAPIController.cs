@@ -2,10 +2,10 @@
 using PokemonHubXWatches.Interfaces;
 using PokemonHubXWatches.Models;
 
-namespace PokemonHubXWatches.Controllers
+namespace PokemonHubXWatches.API
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class HeldItemAPIController : ControllerBase
     {
         private readonly IHeldItemService _heldItemService;
@@ -15,54 +15,51 @@ namespace PokemonHubXWatches.Controllers
             _heldItemService = heldItemService;
         }
 
-        // GET: api/HeldItemAPI/List
-        [HttpGet("List")]
-        public async Task<ActionResult<IEnumerable<HeldItem>>> ListHeldItems()
+        // GET: api/HeldItemAPI
+        [HttpGet]
+        public IActionResult GetAll()
         {
-            var heldItems = await _heldItemService.ListHeldItems();
+            var heldItems = _heldItemService.GetAllHeldItems();
             return Ok(heldItems);
         }
 
-        // GET: api/HeldItemAPI/Find/1
-        [HttpGet("Find/{id}")]
-        public async Task<ActionResult<HeldItem>> FindHeldItem(int id)
+        // GET: api/HeldItemAPI/{id}
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
         {
-            var heldItem = await _heldItemService.FindHeldItem(id);
-            if (heldItem == null)
-                return NotFound();
-
+            var heldItem = _heldItemService.GetHeldItemById(id);
+            if (heldItem == null) return NotFound();
             return Ok(heldItem);
         }
 
-        // POST: api/HeldItemAPI/Create
-        [HttpPost("Create")]
-        public async Task<ActionResult<HeldItem>> CreateHeldItem([FromBody] HeldItem heldItem)
+        // POST: api/HeldItemAPI
+        [HttpPost]
+        public IActionResult Create([FromBody] HeldItemDTO heldItem)
         {
-            if (heldItem == null) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var createdHeldItem = await _heldItemService.CreateHeldItem(heldItem);
-            return CreatedAtAction(nameof(FindHeldItem), new { id = createdHeldItem.HeldItemId }, createdHeldItem);
+            var createdHeldItem = _heldItemService.AddHeldItem(heldItem);
+            return CreatedAtAction(nameof(GetById), new { id = createdHeldItem.HeldItemId }, createdHeldItem);
         }
 
-        // PUT: api/HeldItemAPI/Update/1
-        [HttpPut("Update/{id}")]
-        public async Task<IActionResult> UpdateHeldItem(int id, [FromBody] HeldItem heldItem)
+        // PUT: api/HeldItemAPI/{id}
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] HeldItemDTO heldItem)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             if (id != heldItem.HeldItemId) return BadRequest();
 
-            var success = await _heldItemService.UpdateHeldItem(id, heldItem);
+            var success = _heldItemService.UpdateHeldItem(heldItem);
             if (!success) return NotFound();
-
             return NoContent();
         }
 
-        // DELETE: api/HeldItemAPI/Delete/1
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> DeleteHeldItem(int id)
+        // DELETE: api/HeldItemAPI/{id}
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
-            var success = await _heldItemService.DeleteHeldItem(id);
+            var success = _heldItemService.DeleteHeldItem(id);
             if (!success) return NotFound();
-
             return NoContent();
         }
     }

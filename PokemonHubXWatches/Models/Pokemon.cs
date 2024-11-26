@@ -8,27 +8,39 @@ namespace PokemonHubXWatches.Models
         [Key]
         public int PokemonId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Pokemon name is required.")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
         public string PokemonName { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Pokemon role is required.")]
         public string PokemonRole { get; set; } // Example: Attacker, Defender
 
-        [Required]
+        [Required(ErrorMessage = "Pokemon style is required.")]
         public string PokemonStyle { get; set; } // Example: Melee, Ranged
 
+        [Range(1, 9999, ErrorMessage = "HP must be between 1 and 9999.")]
         public int PokemonHP { get; set; }
-        public int PokemonAttack { get; set; }
-        public int PokemonDefense { get; set; }
-        public int PokemonSpAttack { get; set; }
-        public int PokemonSpDefense { get; set; }
-        public int PokemonCDR { get; set; } // Cooldown Reduction
 
+        [Range(1, 999, ErrorMessage = "Attack must be between 1 and 999.")]
+        public int PokemonAttack { get; set; }
+
+        [Range(1, 999, ErrorMessage = "Defense must be between 1 and 999.")]
+        public int PokemonDefense { get; set; }
+
+        [Range(1, 999, ErrorMessage = "Special Attack must be between 1 and 999.")]
+        public int PokemonSpAttack { get; set; }
+
+        [Range(1, 999, ErrorMessage = "Special Defense must be between 1 and 999.")]
+        public int PokemonSpDefense { get; set; }
+
+        [Range(0, 100, ErrorMessage = "Cooldown Reduction must be between 0 and 100.")]
+        public int PokemonCDR { get; set; }
+
+        [Required(ErrorMessage = "Image URL is required.")]
         public string PokemonImage { get; set; } // URL or Path to the image file
 
         // Relationships
         public ICollection<Build> Builds { get; set; }
-        public ICollection<HeldItem> HeldItems { get; set; }
     }
 
     public class PokemonDTO

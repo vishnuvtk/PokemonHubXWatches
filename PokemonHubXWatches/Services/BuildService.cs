@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using PokemonHubXWatches.Data;
-using PokemonHubXWatches.Interfaces;
 using PokemonHubXWatches.Models;
+using PokemonHubXWatches.Interfaces;
 
 namespace PokemonHubXWatches.Services
 {
@@ -17,101 +15,107 @@ namespace PokemonHubXWatches.Services
             _context = context;
         }
 
-        /// <summary>
-        /// Retrieves all builds from the database.
-        /// </summary>
-        /// <returns>A list of builds.</returns>
-        public async Task<IEnumerable<Build>> ListBuilds()
+        public IEnumerable<BuildDTO> GetAllBuilds()
         {
-            return await _context.Builds
-                .Include(b => b.Pokemon) // Include related Pokémon
-                .Include(b => b.HeldItems) // Include related Held Items
-                .ToListAsync();
-        }
-
-        /// <summary>
-        /// Finds a specific build by its ID.
-        /// </summary>
-        /// <param name="id">The build ID.</param>
-        /// <returns>The build if found, otherwise null.</returns>
-        public async Task<Build> FindBuild(int id)
-        {
-            return await _context.Builds
-                .Include(b => b.Pokemon) // Include related Pokémon
-                .Include(b => b.HeldItems) // Include related Held Items
-                .FirstOrDefaultAsync(b => b.BuildId == id);
-        }
-
-        /// <summary>
-        /// Creates a new build.
-        /// </summary>
-        /// <param name="build">The build to create.</param>
-        /// <returns>The created build.</returns>
-        public async Task<Build> CreateBuild(Build build)
-        {
-            // Attach related HeldItems and Pokémon to avoid duplicate entries
-            foreach (var heldItem in build.HeldItems)
+            return _context.Builds.Select(build => new BuildDTO
             {
-                _context.Attach(heldItem);
-            }
+                BuildId = build.BuildId,
+                PokemonUpdatedHP = build.PokemonUpdatedHP,
+                PokemonUpdatedAttack = build.PokemonUpdatedAttack,
+                PokemonUpdatedDefense = build.PokemonUpdatedDefense,
+                PokemonUpdatedSpAttack = build.PokemonUpdatedSpAttack,
+                PokemonUpdatedSpDefense = build.PokemonUpdatedSpDefense,
+                PokemonUpdatedCDR = build.PokemonUpdatedCDR,
+                PokemonId = build.PokemonId
+            }).ToList();
+        }
 
-            _context.Attach(build.Pokemon);
+        public BuildDTO GetBuildById(int id)
+        {
+            var build = _context.Builds.Find(id);
+            if (build == null) return null;
 
-            _context.Builds.Add(build);
-            await _context.SaveChangesAsync();
+            return new BuildDTO
+            {
+                BuildId = build.BuildId,
+                PokemonUpdatedHP = build.PokemonUpdatedHP,
+                PokemonUpdatedAttack = build.PokemonUpdatedAttack,
+                PokemonUpdatedDefense = build.PokemonUpdatedDefense,
+                PokemonUpdatedSpAttack = build.PokemonUpdatedSpAttack,
+                PokemonUpdatedSpDefense = build.PokemonUpdatedSpDefense,
+                PokemonUpdatedCDR = build.PokemonUpdatedCDR,
+                PokemonId = build.PokemonId
+            };
+        }
+
+        public BuildDTO CreateBuild(BuildDTO build)
+        {
+            var entity = new Build
+            {
+                PokemonId = build.PokemonId,
+                PokemonUpdatedHP = build.PokemonUpdatedHP,
+                PokemonUpdatedAttack = build.PokemonUpdatedAttack,
+                PokemonUpdatedDefense = build.PokemonUpdatedDefense,
+                PokemonUpdatedSpAttack = build.PokemonUpdatedSpAttack,
+                PokemonUpdatedSpDefense = build.PokemonUpdatedSpDefense,
+                PokemonUpdatedCDR = build.PokemonUpdatedCDR
+            };
+
+            _context.Builds.Add(entity);
+            _context.SaveChanges();
+
+            build.BuildId = entity.BuildId;
             return build;
         }
 
-        /// <summary>
-        /// Updates an existing build.
-        /// </summary>
-        /// <param name="id">The build ID.</param>
-        /// <param name="build">The updated build details.</param>
-        /// <returns>True if successful, otherwise false.</returns>
-        public async Task<bool> UpdateBuild(int id, Build build)
+        public bool UpdateBuild(BuildDTO build)
         {
-            var existingBuild = await _context.Builds
-                .Include(b => b.HeldItems)
-                .FirstOrDefaultAsync(b => b.BuildId == id);
+            var entity = _context.Builds.Find(build.BuildId);
+            if (entity == null) return false;
 
-            if (existingBuild == null) return false;
+            entity.PokemonUpdatedHP = build.PokemonUpdatedHP;
+            entity.PokemonUpdatedAttack = build.PokemonUpdatedAttack;
+            entity.PokemonUpdatedDefense = build.PokemonUpdatedDefense;
+            entity.PokemonUpdatedSpAttack = build.PokemonUpdatedSpAttack;
+            entity.PokemonUpdatedSpDefense = build.PokemonUpdatedSpDefense;
+            entity.PokemonUpdatedCDR = build.PokemonUpdatedCDR;
 
-            // Update basic properties
-            existingBuild.PokemonUpdatedHP = build.PokemonUpdatedHP;
-            existingBuild.PokemonUpdatedAttack = build.PokemonUpdatedAttack;
-            existingBuild.PokemonUpdatedDefense = build.PokemonUpdatedDefense;
-            existingBuild.PokemonUpdatedSpAttack = build.PokemonUpdatedSpAttack;
-            existingBuild.PokemonUpdatedSpDefense = build.PokemonUpdatedSpDefense;
-            existingBuild.PokemonUpdatedCDR = build.PokemonUpdatedCDR;
+            _context.Builds.Update(entity);
+            _context.SaveChanges();
 
-            // Update related Pokémon
-            existingBuild.Pokemon = build.Pokemon;
-            existingBuild.PokemonId = build.PokemonId;
-
-            // Update HeldItems (replace the collection)
-            existingBuild.HeldItems.Clear();
-            foreach (var heldItem in build.HeldItems)
-            {
-                existingBuild.HeldItems.Add(await _context.HeldItems.FindAsync(heldItem.HeldItemId));
-            }
-
-            await _context.SaveChangesAsync();
             return true;
         }
 
-        /// <summary>
-        /// Deletes a build by ID.
-        /// </summary>
-        /// <param name="id">The build ID.</param>
-        /// <returns>True if successful, otherwise false.</returns>
-        public async Task<bool> DeleteBuild(int id)
+        public bool DeleteBuild(int id)
         {
-            var build = await _context.Builds.FindAsync(id);
+            var build = _context.Builds.Find(id);
             if (build == null) return false;
 
             _context.Builds.Remove(build);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
+
             return true;
+        }
+
+        public BuildDTO CalculateUpdatedStats(int pokemonId, List<int> heldItemIds)
+        {
+            var pokemon = _context.Pokemons.Find(pokemonId);
+            if (pokemon == null) return null;
+
+            var heldItems = _context.HeldItems.Where(item => heldItemIds.Contains(item.HeldItemId)).ToList();
+
+            var updatedBuild = new BuildDTO
+            {
+                PokemonUpdatedHP = pokemon.PokemonHP + heldItems.Sum(i => i.HeldItemHP),
+                PokemonUpdatedAttack = pokemon.PokemonAttack + heldItems.Sum(i => i.HeldItemAttack),
+                PokemonUpdatedDefense = pokemon.PokemonDefense + heldItems.Sum(i => i.HeldItemDefense),
+                PokemonUpdatedSpAttack = pokemon.PokemonSpAttack + heldItems.Sum(i => i.HeldItemSpAttack),
+                PokemonUpdatedSpDefense = pokemon.PokemonSpDefense + heldItems.Sum(i => i.HeldItemSpDefense),
+                PokemonUpdatedCDR = pokemon.PokemonCDR + heldItems.Sum(i => i.HeldItemCDR),
+                PokemonId = pokemonId
+            };
+
+            return updatedBuild;
         }
     }
 }

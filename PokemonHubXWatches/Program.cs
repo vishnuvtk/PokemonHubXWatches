@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PokemonHubXWatches.Data;
-using PokemonHubXWatches.DataSeed;
+//using PokemonHubXWatches.DataSeed;
 using PokemonHubXWatches.Interfaces;
 using PokemonHubXWatches.Services;
 
@@ -41,22 +41,22 @@ else
     app.UseHsts();
 }
 
-// Seed the database when the application starts
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate(); // Apply migrations
-        DatabaseSeeder.Seed(services); // Seed data
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
-    }
-}
+//Seed the database when the application starts
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    try
+//    {
+//       var context = services.GetRequiredService<ApplicationDbContext>();
+//        context.Database.Migrate(); // Apply migrations
+//       DatabaseSeeder.Seed(services); // Seed data
+//    }
+//    catch (Exception ex)
+//    {
+//       var logger = services.GetRequiredService<ILogger<Program>>();
+//        logger.LogError(ex, "An error occurred while seeding the database.");
+ //   }
+//}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

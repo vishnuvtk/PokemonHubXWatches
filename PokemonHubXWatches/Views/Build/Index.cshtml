@@ -1,5 +1,27 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model IEnumerable<PokemonHubXWatches.Models.BuildDTO>
+
+<h1>Builds</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Pokémon</th>
+            <th>HP</th>
+            <th>Attack</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var build in Model)
+        {
+            <tr>
+                <td>@build.PokemonId</td>
+                <td>@build.PokemonUpdatedHP</td>
+                <td>@build.PokemonUpdatedAttack</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@build.BuildId" class="btn btn-primary">View</a>
+                    <a asp-action="Delete" asp-route-id="@build.BuildId" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
