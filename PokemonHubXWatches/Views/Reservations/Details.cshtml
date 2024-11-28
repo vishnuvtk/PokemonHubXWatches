@@ -1,0 +1,36 @@
+﻿@model PokemonHubXWatches.Models.ReservationDTO
+
+@{
+    ViewData["Title"] = "Reservation Details";
+}
+
+<h2>Reservation Details</h2>
+
+<div>
+    <h4>Reservation</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Reservation Date
+        </dt>
+        <dd class="col-sm-10">
+            @Model.ReservationDate
+        </dd>
+        <dt class="col-sm-2">
+            User
+        </dt>
+        <dd class="col-sm-10">
+            @Model.UserFullName
+        </dd>
+        <dt class="col-sm-2">
+            Watch
+        </dt>
+        <dd class="col-sm-10">
+            @Model.WatchName
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.ReservationID" class="btn btn-primary">Edit</a> |
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>

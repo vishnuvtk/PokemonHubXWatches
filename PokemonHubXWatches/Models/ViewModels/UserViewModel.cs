@@ -1,26 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PokemonHubXWatches.ViewModels
+﻿namespace PokemonHubXWatches.Models.ViewModels
 {
     public class UserViewModel
     {
         public int UserId { get; set; }
-
-        [Required]
-        [Display(Name = "User Name")]
-        public string UserName { get; set; } = string.Empty;
-
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Email Address")]
-        public string Email { get; set; } = string.Empty;
-
-        [Required]
-        [Display(Name = "Full Name")]
-        public string FullName { get; set; } = string.Empty;
-
-        [Required]
-        [Display(Name = "Address")]
-        public string Address { get; set; } = string.Empty;
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        // Display a list of reservation IDs only for simplicity
+        public List<int> ReservationIds { get; set; } = new List<int>();
     }
 }

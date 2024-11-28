@@ -1,0 +1,23 @@
+﻿@model PokemonHubXWatches.Models.WatchDTO
+
+@{
+    ViewData["Title"] = "Watch Details";
+}
+
+<h2>Watch Details</h2>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Name</dt>
+        <dd class="col-sm-10">@Model.Name</dd>
+
+        <dt class="col-sm-2">Price ($)</dt>
+        <dd class="col-sm-10">@Model.Price</dd>
+
+        <dt class="col-sm-2">Description</dt>
+        <dd class="col-sm-10">@Model.Description</dd>
+    </dl>
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.WatchID">Edit</a> |
+<a asp-action="Index">Back to List</a>

@@ -7,82 +7,99 @@ using PokemonHubXWatches.ViewModels;
 
 namespace PokemonHubXWatches.Controllers
 {
-    public class ReservationController : Controller
+    public class ReservationsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public ReservationController(ApplicationDbContext context)
+        public ReservationsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Reservation
+        // GET: Reservations
         public async Task<IActionResult> Index()
         {
             var reservations = await _context.Reservations
                 .Include(r => r.User)
                 .Include(r => r.Watch)
+                .Select(r => new ReservationDTO
+                {
+                    ReservationID = r.ReservationID,
+                    ReservationDate = r.ReservationDate,
+                    UserID = r.UserId,
+                    UserFullName = r.User.UserName, // Include the full name of the user
+                    WatchID = r.WatchID,
+                    WatchName = r.Watch.Name // Include the name of the watch
+                })
                 .ToListAsync();
 
-            var reservationViewModels = reservations.Select(r => new ReservationViewModel
-            {
-                ReservationID = r.ReservationID,
-                ReservationDate = r.ReservationDate,
-                UserId = r.UserId,
-                WatchID = r.WatchID,
-                UserFullName = r.User.UserName,
-                WatchName = r.Watch.Name
-            }).ToList();
-
-            return View(reservationViewModels);
+            return View(reservations);
         }
 
-        // GET: Reservation/Details/5
-        public async Task<IActionResult> Details(int id)
-        {
-            var reservation = await _context.Reservations
-                .Include(r => r.User)
-                .Include(r => r.Watch)
-                .FirstOrDefaultAsync(r => r.ReservationID == id);
 
+        // GET: Reservations/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var reservation = await _context.Reservations
+                .Include(r => r.Watch)
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(m => m.ReservationID == id);
             if (reservation == null)
             {
                 return NotFound();
             }
 
-            var reservationViewModel = new ReservationViewModel
+            var reservationDTO = new ReservationDTO
             {
                 ReservationID = reservation.ReservationID,
                 ReservationDate = reservation.ReservationDate,
-                UserId = reservation.UserId,
                 WatchID = reservation.WatchID,
-                UserFullName = reservation.User.UserName,
-                WatchName = reservation.Watch.Name
+                UserID = reservation.UserId,
+                WatchName = reservation.Watch.Name,
+                UserFullName = reservation.User.UserName
             };
 
-            return View(reservationViewModel);
+            return View(reservationDTO);
         }
 
-        // GET: Reservation/Create
+        // GET: Reservations/Create
         public IActionResult Create()
         {
-            ViewData["Users"] = new SelectList(_context.Users, "UserId", "FullName");
-            ViewData["Watches"] = new SelectList(_context.Watches, "WatchID", "Name");
+            // Fetch all watches
+            var allWatches = _context.Watches.ToList();
+
+            // Get the list of reserved watch IDs
+            var reservedWatchIds = _context.Reservations.Select(r => r.WatchID).ToList();
+
+            // Filter out the watches that are already reserved
+            var availableWatches = allWatches.Where(watch => !reservedWatchIds.Contains(watch.WatchID)).ToList();
+
+            // Pass the filtered watches to the view
+            ViewData["Watches"] = availableWatches;
+
+            // Pass the users to the view
+            ViewData["Users"] = _context.Users.ToList();
+
             return View();
         }
 
-        // POST: Reservation/Create
+        // POST: Reservations/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ReservationViewModel reservationViewModel)
+        public async Task<IActionResult> Create([Bind("ReservationDate,UserID,WatchID")] ReservationDTO reservationDTO)
         {
             if (ModelState.IsValid)
             {
                 var reservation = new Reservation
                 {
-                    ReservationDate = reservationViewModel.ReservationDate,
-                    UserId = reservationViewModel.UserId,
-                    WatchID = reservationViewModel.WatchID
+                    ReservationDate = reservationDTO.ReservationDate,
+                    UserId = reservationDTO.UserID,
+                    WatchID = reservationDTO.WatchID
                 };
 
                 _context.Add(reservation);
@@ -90,102 +107,82 @@ namespace PokemonHubXWatches.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["Users"] = new SelectList(_context.Users, "UserId", "FullName", reservationViewModel.UserId);
-            ViewData["Watches"] = new SelectList(_context.Watches, "WatchID", "Name", reservationViewModel.WatchID);
-            return View(reservationViewModel);
+            ViewData["Users"] = new SelectList(_context.Users, "UserID", "FullName", reservationDTO.UserID);
+            ViewData["Watches"] = new SelectList(_context.Watches, "WatchID", "Name", reservationDTO.WatchID);
+            return View(reservationDTO);
         }
 
-        // GET: Reservation/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        // GET: Reservations/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
+            var allWatches = _context.Watches.ToList();
+
+            // Get the list of reserved watch IDs
+            var reservedWatchIds = _context.Reservations.Select(r => r.WatchID).ToList();
+
+            // Filter out the watches that are already reserved
+            var availableWatches = allWatches.Where(watch => !reservedWatchIds.Contains(watch.WatchID)).ToList();
+
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             var reservation = await _context.Reservations.FindAsync(id);
             if (reservation == null)
             {
                 return NotFound();
             }
 
-            var reservationViewModel = new ReservationViewModel
+            var reservationDTO = new ReservationDTO
             {
                 ReservationID = reservation.ReservationID,
                 ReservationDate = reservation.ReservationDate,
-                UserId = reservation.UserId,
-                WatchID = reservation.WatchID,
-                UserFullName = reservation.User.UserName,
-                WatchName = reservation.Watch.Name
+                UserID = reservation.UserId,
+                WatchID = reservation.WatchID
             };
 
-            return View(reservationViewModel);
+            // Populate the ViewData with users and available watches
+            ViewData["Users"] = _context.Users.ToList();
+            ViewData["Watches"] = _context.Watches
+                .Where(w => !_context.Reservations.Select(r => r.WatchID).Contains(w.WatchID) || w.WatchID == reservation.WatchID)
+                .ToList();
+
+            return View(reservationDTO);
         }
 
-        // POST: Reservation/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ReservationViewModel reservationViewModel)
+
+        // GET: Reservations/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
-            if (id != reservationViewModel.ReservationID)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    var reservation = new Reservation
-                    {
-                        ReservationID = reservationViewModel.ReservationID,
-                        ReservationDate = reservationViewModel.ReservationDate,
-                        UserId = reservationViewModel.UserId,
-                        WatchID = reservationViewModel.WatchID
-                    };
-
-                    _context.Update(reservation);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ReservationExists(reservationViewModel.ReservationID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-
-            ViewData["Users"] = new SelectList(_context.Users, "UserId", "FullName", reservationViewModel.UserId);
-            ViewData["Watches"] = new SelectList(_context.Watches, "WatchID", "Name", reservationViewModel.WatchID);
-            return View(reservationViewModel);
-        }
-
-        // GET: Reservation/Delete/5
-        public async Task<IActionResult> Delete(int id)
-        {
             var reservation = await _context.Reservations
-                .Include(r => r.User)
                 .Include(r => r.Watch)
-                .FirstOrDefaultAsync(r => r.ReservationID == id);
-
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(m => m.ReservationID == id);
             if (reservation == null)
             {
                 return NotFound();
             }
 
-            var reservationViewModel = new ReservationViewModel
+            var reservationDTO = new ReservationDTO
             {
                 ReservationID = reservation.ReservationID,
                 ReservationDate = reservation.ReservationDate,
-                UserFullName = reservation.User.UserName,
-                WatchName = reservation.Watch.Name
+                WatchID = reservation.WatchID,
+                UserID = reservation.UserId,
+                WatchName = reservation.Watch.Name,
+                UserFullName = reservation.User.UserName
             };
 
-            return View(reservationViewModel);
+            return View(reservationDTO);
         }
 
-        // POST: Reservation/Delete/5
+        // POST: Reservations/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -196,7 +193,6 @@ namespace PokemonHubXWatches.Controllers
                 _context.Reservations.Remove(reservation);
                 await _context.SaveChangesAsync();
             }
-
             return RedirectToAction(nameof(Index));
         }
 
@@ -206,3 +202,4 @@ namespace PokemonHubXWatches.Controllers
         }
     }
 }
+

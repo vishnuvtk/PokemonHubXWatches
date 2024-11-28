@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using PokemonHubXWatches.Data;
 using PokemonHubXWatches.Interfaces;
 using PokemonHubXWatches.Models;
 using System.Threading.Tasks;
@@ -9,53 +11,173 @@ namespace PokemonHubXWatches.Controllers
     [ApiController]
     public class ReservationsAPIController : ControllerBase
     {
-        private readonly IReservationService _reservationService;
+        private readonly ApplicationDbContext _context;
 
-        public ReservationsAPIController(IReservationService reservationService)
+        public ReservationsAPIController(ApplicationDbContext context)
         {
-            _reservationService = reservationService;
+            _context = context;
         }
 
-        // GET: api/ReservationsAPI
-        [HttpGet]
-        public async Task<ActionResult> GetReservations()
+
+        /// <summary>
+        /// This endpoint returns all Reservations in the system.
+        /// </summary>
+        /// <returns>[{Reservation},{Reservation},{Reservation}]</returns>
+        /// <example>
+        /// GET api/ReservationsAPI/List -> 
+        /// [
+        ///   {
+        ///     "reservationID": 1,
+        ///     "reservationDate": "2024-10-18T10:00:00",
+        ///     "userID": 1,
+        ///     "watchID": 1
+        ///   },
+        ///   {
+        ///     "reservationID": 2,
+        ///     "reservationDate": "2024-10-19T11:00:00",
+        ///     "userID": 2,
+        ///     "watchID": 2
+        ///   }
+        /// ]
+        /// </example>
+        // GET: api/ReservationsAPI/List
+        [HttpGet("List")]
+        public async Task<ActionResult<IEnumerable<Reservation>>> GetReservations()
         {
-            var reservations = await _reservationService.GetAllReservations();
-            return Ok(reservations);
+            return await _context.Reservations.ToListAsync();
         }
 
-        // GET: api/ReservationsAPI/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult> GetReservation(int id)
+
+        /// <summary>
+        /// This endpoint returns a Reservation specified by its {id}.
+        /// </summary>
+        /// <param name="id">The Reservation ID</param>
+        /// <returns>{Reservation}</returns>
+        /// <example>
+        /// GET api/ReservationsAPI/Find/1 -> 
+        /// {
+        ///   "reservationID": 1,
+        ///   "reservationDate": "2024-10-18T10:00:00",
+        ///   "userID": 1,
+        ///   "watchID": 1
+        /// }
+        /// </example>
+        // GET: api/ReservationsAPI/Find/{id}
+        [HttpGet("Find/{id}")]
+        public async Task<ActionResult<Reservation>> GetReservation(int id)
         {
-            var reservation = await _reservationService.GetReservationById(id);
-            if (reservation == null) return NotFound();
-            return Ok(reservation);
+            var reservation = await _context.Reservations.FindAsync(id);
+
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            return reservation;
         }
 
-        // POST: api/ReservationsAPI
-        [HttpPost]
-        public async Task<ActionResult> PostReservation(ReservationDTO reservationDTO)
-        {
-            await _reservationService.CreateReservation(reservationDTO);
-            return CreatedAtAction(nameof(GetReservation), new { id = reservationDTO.ReservationID }, reservationDTO);
-        }
 
-        // PUT: api/ReservationsAPI/5
-        [HttpPut("{id}")]
-        public async Task<ActionResult> PutReservation(int id, ReservationDTO reservationDTO)
+        /// <summary>
+        /// This endpoint updates a Reservation specified by its {id}.
+        /// </summary>
+        /// <param name="id">The Reservation ID</param>
+        /// <param name="reservation">The updated Reservation object</param>
+        /// <returns>204 No Content or 404 Not Found</returns>
+        /// <example>
+        /// PUT api/ReservationsAPI/Update/1
+        /// {
+        ///   "reservationDate": "2024-11-01T15:30:00",
+        ///   "userID": 1,
+        ///   "watchID": 2
+        /// }
+        /// </example>
+        // PUT: api/ReservationsAPI/Update/{id}
+        [HttpPut("Update/{id}")]
+        public async Task<IActionResult> PutReservation(int id, Reservation reservation)
         {
-            if (id != reservationDTO.ReservationID) return BadRequest();
-            await _reservationService.UpdateReservation(id, reservationDTO);
+            if (id != reservation.ReservationID)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(reservation).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ReservationExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
             return NoContent();
         }
 
-        // DELETE: api/ReservationsAPI/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteReservation(int id)
+
+        /// <summary>
+        /// This endpoint adds a new Reservation.
+        /// </summary>
+        /// <param name="reservation">The Reservation object to add</param>
+        /// <returns>{Reservation}</returns>
+        /// <example>
+        /// POST api/ReservationsAPI/Add
+        /// {
+        ///   "reservationDate": "2024-11-01T15:30:00",
+        ///   "userID": 3,
+        ///   "watchID": 2
+        /// }
+        /// </example>
+        // POST: api/ReservationsAPI/Add
+        [HttpPost("Add")]
+        public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
         {
-            await _reservationService.DeleteReservation(id);
+            _context.Reservations.Add(reservation);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetReservation", new { id = reservation.ReservationID }, reservation);
+        }
+
+
+        /// <summary>
+        /// This endpoint deletes a Reservation specified by its {id}.
+        /// </summary>
+        /// <param name="id">The Reservation ID</param>
+        /// <returns>204 No Content or 404 Not Found</returns>
+        /// <example>
+        /// DELETE api/ReservationsAPI/Delete/1
+        /// </example>
+        // DELETE: api/ReservationsAPI/Delete/{id}
+        [HttpDelete("Delete/{id}")]
+        public async Task<IActionResult> DeleteReservation(int id)
+        {
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            _context.Reservations.Remove(reservation);
+            await _context.SaveChangesAsync();
+
             return NoContent();
+        }
+
+        /// <summary>
+        /// Checks if a reservation exists by its {id}.
+        /// </summary>
+        /// <param name="id">The Reservation ID</param>
+        /// <returns>True if the reservation exists, otherwise false</returns>
+        private bool ReservationExists(int id)
+        {
+            return _context.Reservations.Any(e => e.ReservationID == id);
         }
     }
 }

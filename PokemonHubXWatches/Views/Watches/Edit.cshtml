@@ -1,4 +1,4 @@
-﻿@model PokemonHubXWatches.ViewModels.WatchViewModel
+﻿@model PokemonHubXWatches.Models.WatchDTO
 
 @{
     ViewData["Title"] = "Edit Watch";
@@ -6,14 +6,15 @@
 
 <h2>Edit Watch</h2>
 
-<form asp-action="Edit" method="post">
+<form asp-action="Edit">
+    <input type="hidden" asp-for="WatchID" />
     <div class="form-group">
         <label asp-for="Name"></label>
         <input asp-for="Name" class="form-control" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Price"></label>
+        <label asp-for="Price">Price ($)</label>
         <input asp-for="Price" class="form-control" />
         <span asp-validation-for="Price" class="text-danger"></span>
     </div>
@@ -25,4 +26,4 @@
     <button type="submit" class="btn btn-primary">Save Changes</button>
 </form>
 
-<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+<a asp-action="Index">Back to List</a>

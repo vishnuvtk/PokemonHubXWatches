@@ -1,4 +1,4 @@
-﻿@model PokemonHubXWatches.ViewModels.ReservationViewModel
+﻿@model PokemonHubXWatches.Models.ReservationDTO
 
 @{
     ViewData["Title"] = "Edit Reservation";
@@ -15,16 +15,16 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="UserId" class="control-label">Select User</label>
-        <select asp-for="UserId" class="form-control">
+        <label asp-for="UserID" class="control-label">Select User</label>
+        <select asp-for="UserID" class="form-control">
             <option value="">-- Select User --</option>
             @foreach (var user in (IEnumerable<PokemonHubXWatches.Models.User>)ViewData["Users"])
             {
-                var selected = user.UserId == Model.UserId ? "selected" : "";
+                var selected = user.UserId == Model.UserID ? "selected" : "";
                 <option value="@user.UserId">@user.UserName</option>
             }
         </select>
-        <span asp-validation-for="UserId" class="text-danger"></span>
+        <span asp-validation-for="UserID" class="text-danger"></span>
     </div>
 
     <div class="form-group">

@@ -1,0 +1,37 @@
+﻿@model IEnumerable<PokemonHubXWatches.Models.ReservationDTO>
+
+@{
+    ViewData["Title"] = "Reservations List";
+}
+
+<h2>Reservations List</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Reservation ID</th>
+            <th>Reservation Date</th>
+            <th>Watch</th>
+            <th>User</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var reservation in Model)
+        {
+            <tr>
+                <td>@reservation.ReservationID</td>
+                <td>@reservation.ReservationDate.ToShortDateString()</td>
+                <td>@reservation.WatchName</td> <!-- Display the name of the watch -->
+                <td>@reservation.UserFullName</td> <!-- Display the name of the user -->
+                <td>
+                    <a asp-action="Edit" asp-route-id="@reservation.ReservationID" class="btn btn-primary">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@reservation.ReservationID" class="btn btn-info">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@reservation.ReservationID" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-success">Create New Reservation</a>

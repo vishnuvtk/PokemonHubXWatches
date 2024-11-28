@@ -1,25 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PokemonHubXWatches.ViewModels
+﻿namespace PokemonHubXWatches.Models.ViewModels
 {
     public class WatchViewModel
     {
         public int WatchID { get; set; }
-
-        [Required]
-        [StringLength(100)]
-        [Display(Name = "Watch Name")]
-        public string Name { get; set; } = string.Empty;
-
-        [Required]
-        [Range(0, 1000000)]
-        [DataType(DataType.Currency)]
-        [Display(Name = "Price")]
+        public string Name { get; set; }
         public decimal Price { get; set; }
-
-        [Required]
-        [StringLength(500)]
-        [Display(Name = "Description")]
-        public string Description { get; set; } = string.Empty;
+        public string Description { get; set; }
+        public int? ReservationId { get; set; } // Include reservation ID if there is a reservation
     }
 }

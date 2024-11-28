@@ -1,16 +1,17 @@
-﻿@model IEnumerable<PokemonHubXWatches.ViewModels.WatchViewModel>
+﻿@model IEnumerable<PokemonHubXWatches.Models.Watch>
 
 @{
-    ViewData["Title"] = "Watches";
+    ViewData["Title"] = "Watches List";
 }
 
-<h2>Watches</h2>
+<h2>Watches List</h2>
 
 <table class="table">
     <thead>
         <tr>
-            <th>Watch Name</th>
-            <th>Price</th>
+            <th>Watch ID</th>
+            <th>Name</th>
+            <th>Price ($)</th>
             <th>Description</th>
             <th>Actions</th>
         </tr>
@@ -19,12 +20,13 @@
         @foreach (var watch in Model)
         {
             <tr>
+                <td>@watch.WatchID</td>
                 <td>@watch.Name</td>
                 <td>@watch.Price</td>
                 <td>@watch.Description</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@watch.WatchID" class="btn btn-info">Details</a>
-                    <a asp-action="Edit" asp-route-id="@watch.WatchID" class="btn btn-warning">Edit</a>
+                    <a asp-action="Edit" asp-route-id="@watch.WatchID" class="btn btn-primary">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@watch.WatchID" class="btn btn-info">Details</a> |
                     <a asp-action="Delete" asp-route-id="@watch.WatchID" class="btn btn-danger">Delete</a>
                 </td>
             </tr>

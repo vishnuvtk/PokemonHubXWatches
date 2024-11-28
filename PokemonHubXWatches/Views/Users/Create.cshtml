@@ -1,23 +1,25 @@
-﻿@model PokemonHubXWatches.ViewModels.UserViewModel
+﻿@model PokemonHubXWatches.Models.User
 
 @{
-    ViewData["Title"] = "Edit User";
+    ViewData["Title"] = "Create User";
 }
 
-<h2>Edit User</h2>
+<h2>Create User</h2>
 
-<form asp-action="Edit" method="post">
+<form asp-action="Create">
     <div class="form-group">
-        <label asp-for="UserName"></label>
+        <label asp-for="UserName" class="control-label"></label>
         <input asp-for="UserName" class="form-control" />
         <span asp-validation-for="UserName" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Email"></label>
+        <label asp-for="Email" class="control-label"></label>
         <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
 </form>
 
 <a asp-action="Index" class="btn btn-secondary">Back to List</a>

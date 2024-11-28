@@ -6,87 +6,57 @@ using PokemonHubXWatches.ViewModels;
 
 namespace PokemonHubXWatches.Controllers
 {
-    public class WatchController : Controller
+    public class WatchesController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public WatchController(ApplicationDbContext context)
+        public WatchesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Watch
+        // GET: Watches
         public async Task<IActionResult> Index()
         {
             var watches = await _context.Watches.ToListAsync();
-            var watchViewModels = watches.Select(w => new WatchViewModel
-            {
-                WatchID = w.WatchID,
-                Name = w.Name,
-                Price = w.Price,
-                Description = w.Description
-            }).ToList();
-
-            return View(watchViewModels);
+            return View(watches);
         }
 
-        // GET: Watch/Details/5
-        public async Task<IActionResult> Details(int id)
-        {
-            var watch = await _context.Watches.FindAsync(id);
-            if (watch == null)
-            {
-                return NotFound();
-            }
-
-            var watchViewModel = new WatchViewModel
-            {
-                WatchID = watch.WatchID,
-                Name = watch.Name,
-                Price = watch.Price,
-                Description = watch.Description
-            };
-
-            return View(watchViewModel);
-        }
-
-        // GET: Watch/Create
+        // GET: Watches/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Watch/Create
+        // POST: Watches/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(WatchViewModel watchViewModel)
+        public async Task<IActionResult> Create([Bind("WatchID,Name,Price,Description")] Watch watch)
         {
             if (ModelState.IsValid)
             {
-                var watch = new Watch
-                {
-                    Name = watchViewModel.Name,
-                    Price = watchViewModel.Price,
-                    Description = watchViewModel.Description
-                };
-
                 _context.Add(watch);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(watchViewModel);
+            return View(watch);
         }
 
-        // GET: Watch/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        // GET: Watches/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             var watch = await _context.Watches.FindAsync(id);
             if (watch == null)
             {
                 return NotFound();
             }
 
-            var watchViewModel = new WatchViewModel
+            var watchDTO = new WatchDTO
             {
                 WatchID = watch.WatchID,
                 Name = watch.Name,
@@ -94,15 +64,15 @@ namespace PokemonHubXWatches.Controllers
                 Description = watch.Description
             };
 
-            return View(watchViewModel);
+            return View(watchDTO);
         }
 
-        // POST: Watch/Edit/5
+        // POST: Watches/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, WatchViewModel watchViewModel)
+        public async Task<IActionResult> Edit(int id, [Bind("WatchID,Name,Price,Description")] WatchDTO watchDTO)
         {
-            if (id != watchViewModel.WatchID)
+            if (id != watchDTO.WatchID)
             {
                 return NotFound();
             }
@@ -113,10 +83,10 @@ namespace PokemonHubXWatches.Controllers
                 {
                     var watch = new Watch
                     {
-                        WatchID = watchViewModel.WatchID,
-                        Name = watchViewModel.Name,
-                        Price = watchViewModel.Price,
-                        Description = watchViewModel.Description
+                        WatchID = watchDTO.WatchID,
+                        Name = watchDTO.Name,
+                        Price = watchDTO.Price,
+                        Description = watchDTO.Description
                     };
 
                     _context.Update(watch);
@@ -124,7 +94,7 @@ namespace PokemonHubXWatches.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!WatchExists(watchViewModel.WatchID))
+                    if (!WatchExists(watchDTO.WatchID))
                     {
                         return NotFound();
                     }
@@ -135,19 +105,25 @@ namespace PokemonHubXWatches.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(watchViewModel);
+            return View(watchDTO);
         }
 
-        // GET: Watch/Delete/5
-        public async Task<IActionResult> Delete(int id)
+        // GET: Watches/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
-            var watch = await _context.Watches.FindAsync(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var watch = await _context.Watches.FirstOrDefaultAsync(m => m.WatchID == id);
             if (watch == null)
             {
                 return NotFound();
             }
 
-            var watchViewModel = new WatchViewModel
+            // Create WatchDTO for the view
+            var watchDTO = new WatchDTO
             {
                 WatchID = watch.WatchID,
                 Name = watch.Name,
@@ -155,10 +131,10 @@ namespace PokemonHubXWatches.Controllers
                 Description = watch.Description
             };
 
-            return View(watchViewModel);
+            return View(watchDTO);
         }
 
-        // POST: Watch/Delete/5
+        // POST: Watches/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -169,8 +145,32 @@ namespace PokemonHubXWatches.Controllers
                 _context.Watches.Remove(watch);
                 await _context.SaveChangesAsync();
             }
-
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Watches/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var watch = await _context.Watches.FirstOrDefaultAsync(m => m.WatchID == id);
+            if (watch == null)
+            {
+                return NotFound();
+            }
+
+            var watchDTO = new WatchDTO
+            {
+                WatchID = watch.WatchID,
+                Name = watch.Name,
+                Price = watch.Price,
+                Description = watch.Description
+            };
+
+            return View(watchDTO);
         }
 
         private bool WatchExists(int id)
