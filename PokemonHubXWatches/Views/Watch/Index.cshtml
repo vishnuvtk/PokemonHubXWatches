@@ -1,0 +1,35 @@
+﻿@model IEnumerable<PokemonHubXWatches.ViewModels.WatchViewModel>
+
+@{
+    ViewData["Title"] = "Watches";
+}
+
+<h2>Watches</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Watch Name</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var watch in Model)
+        {
+            <tr>
+                <td>@watch.Name</td>
+                <td>@watch.Price</td>
+                <td>@watch.Description</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@watch.WatchID" class="btn btn-info">Details</a>
+                    <a asp-action="Edit" asp-route-id="@watch.WatchID" class="btn btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@watch.WatchID" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-primary">Create New Watch</a>

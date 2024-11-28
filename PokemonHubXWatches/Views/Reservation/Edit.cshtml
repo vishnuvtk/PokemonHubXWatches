@@ -1,0 +1,46 @@
+﻿@model PokemonHubXWatches.ViewModels.ReservationViewModel
+
+@{
+    ViewData["Title"] = "Edit Reservation";
+}
+
+<h2>Edit Reservation</h2>
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="ReservationID" />
+    <div class="form-group">
+        <label asp-for="ReservationDate" class="control-label"></label>
+        <input asp-for="ReservationDate" class="form-control" type="datetime-local" />
+        <span asp-validation-for="ReservationDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="UserId" class="control-label">Select User</label>
+        <select asp-for="UserId" class="form-control">
+            <option value="">-- Select User --</option>
+            @foreach (var user in (IEnumerable<PokemonHubXWatches.Models.User>)ViewData["Users"])
+            {
+                var selected = user.UserId == Model.UserId ? "selected" : "";
+                <option value="@user.UserId">@user.UserName</option>
+            }
+        </select>
+        <span asp-validation-for="UserId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="WatchID" class="control-label">Select Watch</label>
+        <select asp-for="WatchID" class="form-control">
+            <option value="">-- Select Watch --</option>
+            @foreach (var watch in (IEnumerable<PokemonHubXWatches.Models.Watch>)ViewData["Watches"])
+            {
+                var selected = watch.WatchID == Model.WatchID ? "selected" : "";
+                <option value="@watch.WatchID">@watch.Name</option>
+            }
+        </select>
+        <span asp-validation-for="WatchID" class="text-danger"></span>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</form>

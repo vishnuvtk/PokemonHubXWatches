@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PokemonHubXWatches.Data;
 
@@ -11,9 +12,11 @@ using PokemonHubXWatches.Data;
 namespace PokemonHubXWatches.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241127215451_okay2")]
+    partial class okay2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -363,78 +366,6 @@ namespace PokemonHubXWatches.Data.Migrations
                     b.ToTable("Pokemons");
                 });
 
-            modelBuilder.Entity("PokemonHubXWatches.Models.Reservation", b =>
-                {
-                    b.Property<int>("ReservationID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReservationID"));
-
-                    b.Property<DateTime>("ReservationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WatchID")
-                        .HasColumnType("int");
-
-                    b.HasKey("ReservationID");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("WatchID")
-                        .IsUnique();
-
-                    b.ToTable("Reservations");
-                });
-
-            modelBuilder.Entity("PokemonHubXWatches.Models.User", b =>
-                {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("PokemonHubXWatches.Models.Watch", b =>
-                {
-                    b.Property<int>("WatchID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WatchID"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("WatchID");
-
-                    b.ToTable("Watches");
-                });
-
             modelBuilder.Entity("BuildHeldItem", b =>
                 {
                     b.HasOne("PokemonHubXWatches.Models.Build", null)
@@ -512,38 +443,9 @@ namespace PokemonHubXWatches.Data.Migrations
                     b.Navigation("Pokemon");
                 });
 
-            modelBuilder.Entity("PokemonHubXWatches.Models.Reservation", b =>
-                {
-                    b.HasOne("PokemonHubXWatches.Models.User", "User")
-                        .WithMany("Reservations")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PokemonHubXWatches.Models.Watch", "Watch")
-                        .WithOne("Reservation")
-                        .HasForeignKey("PokemonHubXWatches.Models.Reservation", "WatchID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-
-                    b.Navigation("Watch");
-                });
-
             modelBuilder.Entity("PokemonHubXWatches.Models.Pokemon", b =>
                 {
                     b.Navigation("Builds");
-                });
-
-            modelBuilder.Entity("PokemonHubXWatches.Models.User", b =>
-                {
-                    b.Navigation("Reservations");
-                });
-
-            modelBuilder.Entity("PokemonHubXWatches.Models.Watch", b =>
-                {
-                    b.Navigation("Reservation");
                 });
 #pragma warning restore 612, 618
         }
